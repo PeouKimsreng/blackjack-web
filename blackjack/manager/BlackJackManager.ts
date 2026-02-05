@@ -217,6 +217,16 @@ export class BlackJackManager extends Component {
                             break;
                         case "CMD_POT_REJOIN":
 
+                            // Clear current UI/state to avoid duplicating chips/cards on rejoin
+                            BlackJackUIPlayerButtonsPanel.instance.hide();
+                            BlackJackUITimmer.instance.hide();
+                            BlackJackUIPotInfo.instance.resetPotsInfo();
+                            BlackJackUIDealerPotInfo.instance.resetPotsInfo();
+                            BlackJackPlayerBettingPots.instance.hideHighlight();
+                            this.players.getDealerSeat.hand.onClear();
+                            this.players.mySeat.handCardPots.clearCards();
+                            this.bettingChipManager.resetAllBets();
+
                             const rejoinPotsData = params.getSFSArray("pots");
                             for(let i =0; i< rejoinPotsData.size(); i++){
                                 const potObj = rejoinPotsData.getSFSObject(i);
@@ -270,6 +280,16 @@ export class BlackJackManager extends Component {
                                     const total_time = potObj.getInt("total_time");
                                     if(total_time > 0){
                                         BlackJackUITimmer.instance.show(total_time);
+                                    }
+                                }
+
+                                // show pot result on reconnect if result already resolved
+                                if (potObj.containsKey("result_type")) {
+                                    if (betPotIndex == -1) {
+                                        const dealerPotResult = potObj.getInt("result_type");
+                                        BlackJackUIDealerResutls.instance.result.setPotResult(dealerPotResult);
+                                    } else {
+                                        BlackJackUIPotInfo.instance.showPotResult(betPotIndex, potObj);
                                     }
                                 }
                             }
@@ -364,7 +384,7 @@ export class BlackJackManager extends Component {
                                 if(potObj.containsKey("chips")){
                                     var bettChips = potObj.getDoubleArray("chips");
                                     BlackJackPlayerBettingPots.instance.selectPot(betPotIndex);
-                                    for(betAmount of bettChips){
+                                    for (const betAmount of bettChips) {
                                         if(betAmount && betAmount > 0){
                                             this.animateChipsBettingFromPlayerToCenterTable(betPotIndex,this.getPlayerSeat(1),betAmount);
                                         }
@@ -378,7 +398,7 @@ export class BlackJackManager extends Component {
 
                             break;
                         case "CMD_SEAT":
-                            console.log("CMD_SEAT received" + params.getDump);
+                            console.log("CMD_SEAT received" + params.getDump());
                             const seatId = params.getInt(SFSObjectKeys.SEAT_ID);
                             const success = params.getBool("success");
                             break;
@@ -766,6 +786,7 @@ export class BlackJackManager extends Component {
     }
 
     setChipsOnPot(betPotIndex : number, bet_amount: number, playerBetting : BlackJackPlayerSeat, skipAnimation : boolean = true){
+        const prevSkip = this.skipChipsAnimation;
         this.skipChipsAnimation = skipAnimation;
 
         var targetWorldPosition = BlackJackPlayerBettingPots.instance.getPotWorldPosition(betPotIndex);
@@ -775,6 +796,7 @@ export class BlackJackManager extends Component {
             this.bettingChipManager.addMoreBet(betPotIndex,chipNode);
         }
         this.bettingChipManager.forceChipsToCenter();
+        this.skipChipsAnimation = prevSkip;
     }
 
     /*
