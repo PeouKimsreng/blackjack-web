@@ -135,6 +135,10 @@ export class BlackJackManager extends Component {
         BlackJackUIPlayerButtonsPanel.instance.hide();
         SmartFoxManager.ins.extensionResponseCallback = async (cmd: string, params: SFSObject, room: SFSRoom) =>{
                   // console.log("BlackJackManager extensionResponseCallback cmd: " + cmd);
+                    if (!params) {
+                        console.warn("BlackJackManager extensionResponseCallback received null params for cmd:", cmd);
+                        return;
+                    }
                     console.log("BlackJackManager extensionResponseCallback cmd: " + cmd + " params: " + params.getDump());
                     switch (cmd){
 
@@ -150,9 +154,13 @@ export class BlackJackManager extends Component {
                             break;
 
                         case "CMD_PERIOD_CHANGED": 
-                            const period = params.getUtfString("value");
-
-                            BlackJackUIRoomInfoPanel.instance.setPariodValue(period);
+                            if (params.containsKey("value")) {
+                                const period = params.getUtfString("value");
+                                const roomInfoPanel = BlackJackUIRoomInfoPanel.instance;
+                                if (roomInfoPanel) {
+                                    roomInfoPanel.setPariodValue(period);
+                                }
+                            }
                             break;
                         case "CMD_INVALID_MIN_BET_AMOUNT": 
                             BlackJackUIBettingPanel.instance.onInvalidMinBetAmount();
