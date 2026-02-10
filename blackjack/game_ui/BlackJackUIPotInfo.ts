@@ -2,6 +2,7 @@ import { _decorator, Component, director, Enum, game, isValid, Label, Node, Spri
 import { ToastMessage } from '../message/ToastMessage';
 import { BlackJackManager } from '../manager/BlackJackManager';
 import { BlackJackUIResults } from './BlackJackUIResutls';
+import { BlackJackUIGameHistory } from './BlackJackUIGameHistory';
 const { ccclass, property } = _decorator;
 
 @ccclass('BlackJackUIPotInfo')

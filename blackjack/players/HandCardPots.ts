@@ -6,7 +6,7 @@ const { ccclass, property } = _decorator;
 export class HandCardPots extends Component
 {
 
-    @property(BlackJackHandCards)
+    @property([BlackJackHandCards])
     handCards : BlackJackHandCards[] = [];
 
     onNewGame(){

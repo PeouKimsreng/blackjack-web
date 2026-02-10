@@ -20,8 +20,8 @@ export class BlackJackHandCards extends Component {
     @property
     isHandForSplit : boolean = false;
 
-    @property({type: BlackJackCard})
-    cards : Array<BlackJackCard> = Array();
+    @property({type: [BlackJackCard]})
+    cards : Array<BlackJackCard> = [];
     @property({type: Node})
     slots : Array<Node> = Array();
 

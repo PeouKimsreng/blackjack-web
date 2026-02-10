@@ -1,4 +1,4 @@
-import { _decorator, assetManager, AudioClip, Component, isValid, Node, Size, Sprite, SpriteAtlas, SpriteFrame, tween, Tween, UITransform,Vec3 } from 'cc';
+import { _decorator, assetManager, AudioClip, Component, director, isValid, Node, Size, Sprite, SpriteAtlas, SpriteFrame, tween, Tween, UITransform,Vec3 } from 'cc';
 import { getCard, getCardByName } from '../../GlobalBlackJack';
 import { BlackJackManager } from '../manager/BlackJackManager';
 import { BlackJackDeck } from './BlackJackDeck';
@@ -267,7 +267,12 @@ export class BlackJackCard extends Component {
             .parallel(scaleCard, moveCard)
             .call(() => {
                 this.dealTween = undefined;
-                BlackJackManager.instance.playSound(this.dealClip);
+                //BlackJackManager.instance.playSound(this.dealClip);
+                  BlackJackManager.instance.playSound(this.dealClip);
+                const manager = director.getScene()
+                    ?.getChildByName('Canvas')
+                    ?.getComponent('BlackJackManager') as { playSound?: (clip: AudioClip) => void } | null;
+                manager?.playSound?.(this.dealClip);
                 this.showCard();
                 // if (this.data !== undefined) {
                 //     this.responseCard(this.data);

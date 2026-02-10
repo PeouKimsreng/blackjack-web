@@ -22,10 +22,10 @@ export class BlackJackPlayerProfile extends Component {
     betAmount: BetAmount = null;
     @property(BlackJackUIScore) 
     scoreAmount: BlackJackUIScore = null;
-    @property(Node) 
-    readyIcon: Node = null;
-    @property(UIOpacity) 
-    readyIconUiOpacity: UIOpacity = null;
+    // @property(Node) 
+    // readyIcon: Node = null;
+    // @property(UIOpacity) 
+    // readyIconUiOpacity: UIOpacity = null;
     @property(UIOpacity) 
     uiOpacity: UIOpacity = null;
     @property(GameResultDisplay) 
@@ -55,7 +55,7 @@ export class BlackJackPlayerProfile extends Component {
 
     onLoad(): void {
         this.uiOpacity ??= this.getComponent(UIOpacity);
-        this.readyIconUiOpacity ??= this.readyIcon?.getComponent(UIOpacity);
+        // this.readyIconUiOpacity ??= this.readyIcon?.getComponent(UIOpacity);
         this.reset();
 
         this.alignScorePanelToCardsCenter();
@@ -63,7 +63,8 @@ export class BlackJackPlayerProfile extends Component {
     }
 
     get readyOpacity(): UIOpacity {
-        return this.readyIconUiOpacity ??= this.readyIcon?.getComponent(UIOpacity);
+     //   return this.readyIconUiOpacity ??= this.readyIcon?.getComponent(UIOpacity);
+         return this.getComponentInChildren(UIOpacity);
     }
 
     set isSelf(value : boolean ){        
@@ -95,8 +96,8 @@ export class BlackJackPlayerProfile extends Component {
     }
 
     reset(): void {
-        this.readyIcon.active = false;
-        this.readyOpacity.opacity = 0;
+        // this.readyIcon.active = false;
+        // this.readyOpacity.opacity = 0;
         this._amountGain = null;
         this._isResultSet = false;
         this.hideBetAmount();
@@ -113,7 +114,7 @@ export class BlackJackPlayerProfile extends Component {
             this.gameResult?.onNewGame();
         }
         this.scoreAmount?.onNewGame();
-        this.setReady(false);
+        // this.setReady(false);
     }
 
     onWaiting(): void {
@@ -177,25 +178,25 @@ export class BlackJackPlayerProfile extends Component {
         setAvatarIcon(avatar, this.avatar);
     }
 
-    setReady(isReady: boolean): void {
-        this.readyIcon.active = isReady;
-        this.readyOpacity.opacity = isReady ? 255 : 0;
-    }
+    // setReady(isReady: boolean): void {
+    //     this.readyIcon.active = isReady;
+    //     this.readyOpacity.opacity = isReady ? 255 : 0;
+    // }
 
-    hideReady(skipAnim : boolean = false): void {
-        if(skipAnim){
-            this.readyOpacity.opacity = 0;
-            this.readyIcon.active = false;
-        }
-        else{
-            this.tweenReady = tween(this.readyOpacity)
-                        .delay(0.5)
-                        .to(0.5, { opacity: 0 }, { easing: 'fade' })
-                        .call(() => { this.readyIcon.active = false; })
-                        .start();
-        }
+    // hideReady(skipAnim : boolean = false): void {
+    //     if(skipAnim){
+    //         this.readyOpacity.opacity = 0;
+    //         this.readyIcon.active = false;
+    //     }
+    //     else{
+    //         this.tweenReady = tween(this.readyOpacity)
+    //                     .delay(0.5)
+    //                     .to(0.5, { opacity: 0 }, { easing: 'fade' })
+    //                     .call(() => { this.readyIcon.active = false; })
+    //                     .start();
+    //     }
        
-    }
+    // }
 
     onEndCompareCard(): void {
         this.tweenReady?.stop();

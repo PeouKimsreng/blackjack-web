@@ -155,7 +155,7 @@ export class BlackJackPlayerSeat extends Component {
         this.seatButton.node.active = true;
         this.profile.node.active = false
         this.profile.reset();
-        this.profile.setReady(false);
+        // this.profile.setReady(false);
         this.profile.setIsPlaying(false);
         this.is_self = false;
         this.IsSelf = false;
@@ -167,7 +167,7 @@ export class BlackJackPlayerSeat extends Component {
         this.seatButton.node.active = true;
         this.profile.node.active = false
         this.profile.reset();
-        this.profile.setReady(false);
+        // this.profile.setReady(false);
         this.profile.setIsPlaying(false);
         this.IsSelf = false;
         this.hand.onClear();
@@ -237,7 +237,7 @@ export class BlackJackPlayerSeat extends Component {
     }
 
     onConfirmedCard(cardSize: number,  cardDatas : BlackJackGame.Card[]){
-        this.profile.setReady(true);
+        // this.profile.setReady(true);
         this.hand.onConfirmedCard(cardSize,cardDatas);
     }
 
@@ -281,14 +281,14 @@ export class BlackJackPlayerSeat extends Component {
     onPlayerIsWaiting(){
         this.profile.onWaiting();
         this.hand.onWaiting();
-        this.profile.setReady(false);
+        // this.profile.setReady(false);
         this._isOpenCardsCompared = false;
     }
 
     onWaiting(){
         this.profile.onWaiting();
         this.hand.onWaiting();
-        this.profile.setReady(false);
+        // this.profile.setReady(false);
         this._isOpenCardsCompared = false;
     }
 
@@ -352,7 +352,7 @@ export class BlackJackPlayerSeat extends Component {
 
         this._isOpenCardsCompared = true;
         this.hand.activeCardsBySize(data.player.card_size);
-        this.profile.hideReady();
+        // this.profile.hideReady();
         //this.hand.currentCardsInHand = data.player.card_size;
         this.profile.setResult(data.player.win_amount);
         this.profile.setStatusScore(data.player.score,data.player.result_status);

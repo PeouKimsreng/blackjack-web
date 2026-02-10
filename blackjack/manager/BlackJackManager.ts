@@ -22,6 +22,9 @@ import { BlackJackUITimmer } from '../game_ui/BlackJackUITimmer';
 import { BlackJackUIPotResult } from '../game_ui/BlackJackUIPotResult';
 import { BlackJackUIResults } from '../game_ui/BlackJackUIResutls';
 import { BlackJackUIDealerResutls } from '../game_ui/BlackJackUIDealerResutls';
+import { GameResultCapture } from '../../GameResultCapture';
+import { BlackJackUIGameResults } from '../game_ui/BlackJackUIGameResults';
+import { BlackJackUIGameHistory } from '../game_ui/BlackJackUIGameHistory';
 const { ccclass, property,executionOrder } = _decorator;
 
 @ccclass('BlackJackManager')
@@ -52,8 +55,8 @@ export class BlackJackManager extends Component {
     compareCardsData : BlackJackGame.Player.PlayerCardsResponse[] = undefined;
     deductionData : BlackJackGame.Player.PlayerCardsResponse[] = undefined;
     me : PlayerProfileResponse = undefined;
-
-    screenCapture : any = undefined;
+    @property(GameResultCapture)
+    screenCapture : GameResultCapture = undefined;
 
     bettingChips : number[] = [];
     
@@ -132,7 +135,7 @@ export class BlackJackManager extends Component {
         BlackJackUIPlayerButtonsPanel.instance.hide();
         SmartFoxManager.ins.extensionResponseCallback = async (cmd: string, params: SFSObject, room: SFSRoom) =>{
                   // console.log("BlackJackManager extensionResponseCallback cmd: " + cmd);
-                  // console.log( "cmd: " + cmd + " params: " + params.getDump());
+                    console.log("BlackJackManager extensionResponseCallback cmd: " + cmd + " params: " + params.getDump());
                     switch (cmd){
 
                         case "CMD_ROOM_INFO":
@@ -160,26 +163,29 @@ export class BlackJackManager extends Component {
                         break;
 
                         case "CMD_RESET":
-                            this.bettingData = [];
-                            this.totalBetInfo.reset();
-                            this.totalBetInfo.hide();
-                            this.isRebetting = false;
-                            this.skipChipsAnimation = false;
-                            BlackJackUIBettingPanel.instance.hide();
-                            BlackJackUIDealerPotInfo.instance.resetPotsInfo();
-                            BlackJackUIPotInfo.instance.resetPotsInfo();
-                            BlackJackPlayerBettingPots.instance.setActivePlaceBetText(false);                            
-                            BlackJackUIResults.instance.hideAllPotsResult();
+                            //this.scheduleOnce( () => {
+                                this.bettingData = [];
+                                this.totalBetInfo.reset();
+                                this.totalBetInfo.hide();
+                                this.isRebetting = false;
+                                this.skipChipsAnimation = false;
 
-                            BlackJackUIDealerResutls.instance.hideAllPotResult();
+                                BlackJackUIBettingPanel.instance.hide();
+                                BlackJackUIDealerPotInfo.instance.resetPotsInfo();
+                                BlackJackUIPotInfo.instance.resetPotsInfo();
+                                BlackJackPlayerBettingPots.instance.setActivePlaceBetText(false);                            
+                                BlackJackUIResults.instance.hideAllPotsResult();
+                                BlackJackUIDealerResutls.instance.hideAllPotResult();
+                                this.players.getDealerSeat.hand.onClear();
+                                this.players.mySeat.handCardPots.clearCards();
+                                this.players.getDealerSeat.hand.setEnableSelected = false;
+                                this.players.mySeat.handCardPots.deselectedHandCards();
+                                ToastMessage.instance.reset();
+
+                                this.bettingChipManager.resetAllBets();
+                            // },0.5);
+
                             
-                            this.players.getDealerSeat.hand.onClear();
-                            this.players.mySeat.handCardPots.clearCards();
-                            this.players.getDealerSeat.hand.setEnableSelected = false;
-                            this.players.mySeat.handCardPots.deselectedHandCards();
-                            ToastMessage.instance.reset();
-
-                            this.bettingChipManager.resetAllBets();
 
                             BlackJackUITimmer.instance.hide();
                             // return chips to player
@@ -216,16 +222,6 @@ export class BlackJackManager extends Component {
                             }
                             break;
                         case "CMD_POT_REJOIN":
-
-                            // Clear current UI/state to avoid duplicating chips/cards on rejoin
-                            BlackJackUIPlayerButtonsPanel.instance.hide();
-                            BlackJackUITimmer.instance.hide();
-                            BlackJackUIPotInfo.instance.resetPotsInfo();
-                            BlackJackUIDealerPotInfo.instance.resetPotsInfo();
-                            BlackJackPlayerBettingPots.instance.hideHighlight();
-                            this.players.getDealerSeat.hand.onClear();
-                            this.players.mySeat.handCardPots.clearCards();
-                            this.bettingChipManager.resetAllBets();
 
                             const rejoinPotsData = params.getSFSArray("pots");
                             for(let i =0; i< rejoinPotsData.size(); i++){
@@ -280,16 +276,22 @@ export class BlackJackManager extends Component {
                                     const total_time = potObj.getInt("total_time");
                                     if(total_time > 0){
                                         BlackJackUITimmer.instance.show(total_time);
-                                    }
-                                }
 
-                                // show pot result on reconnect if result already resolved
-                                if (potObj.containsKey("result_type")) {
-                                    if (betPotIndex == -1) {
-                                        const dealerPotResult = potObj.getInt("result_type");
-                                        BlackJackUIDealerResutls.instance.result.setPotResult(dealerPotResult);
-                                    } else {
-                                        BlackJackUIPotInfo.instance.showPotResult(betPotIndex, potObj);
+                                        if(betPotIndex != -1){
+                                            if(total_time > 0)
+                                                this.players.mySeat.handCardPots.selectHandCards(betPotIndex);
+                                            else{
+                                                this.players.mySeat.handCardPots.deSelectHandCards(betPotIndex);
+                                            }
+                                        }
+                                        else{
+                                            if(total_time > 0)
+                                                this.players.getDealerSeat.hand.setEnableSelected = true;
+                                            else{
+                                                this.players.getDealerSeat.hand.setEnableSelected = false;
+                                            }
+                                        }
+
                                     }
                                 }
                             }
@@ -342,10 +344,7 @@ export class BlackJackManager extends Component {
                            }
                             break;
                         case "CMD_CLEAR_BET":
-                            for(var i =0; i<=5; i++){
-                                this.bettingChipManager.returnChips(i,this.getPlayerSeat(1).BetOrginNode)
-                            }
-                            this.isRebetting = false;
+                            this.onCMDClearBet();
                             break;
                         case "CMD_DOUBLE": 
                             const doubleBetPotIndex = params.getInt("index");
@@ -374,6 +373,9 @@ export class BlackJackManager extends Component {
                             if(this.isRebetting){
                                 break;
                             }
+                            // return chips to player, then animate chips from player to pot again for last bet effect
+                            this.clearBetingChips();
+
                             this.isRebetting = true;
 
                             this.totalBetInfo.responseBetInfo(params);
@@ -384,7 +386,7 @@ export class BlackJackManager extends Component {
                                 if(potObj.containsKey("chips")){
                                     var bettChips = potObj.getDoubleArray("chips");
                                     BlackJackPlayerBettingPots.instance.selectPot(betPotIndex);
-                                    for (const betAmount of bettChips) {
+                                    for(const betAmount of bettChips){
                                         if(betAmount && betAmount > 0){
                                             this.animateChipsBettingFromPlayerToCenterTable(betPotIndex,this.getPlayerSeat(1),betAmount);
                                         }
@@ -398,7 +400,6 @@ export class BlackJackManager extends Component {
 
                             break;
                         case "CMD_SEAT":
-                            console.log("CMD_SEAT received" + params.getDump());
                             const seatId = params.getInt(SFSObjectKeys.SEAT_ID);
                             const success = params.getBool("success");
                             break;
@@ -582,12 +583,12 @@ export class BlackJackManager extends Component {
 
                             const potIndexResult = params.getInt("index");
                             this.currentPotIndex = potIndexResult;
-                            BlackJackUIPotInfo.instance.showPotResult(potIndexResult,params);
-
-                            
+                            BlackJackUIPotInfo.instance.showPotResult(potIndexResult,params);                            
                             break;
-
-
+                        
+                        case "CMD_END_GAME":
+                            BlackJackUIGameHistory.instance.captureGameResults();
+                            break;
                         default:
                            
                         break;
@@ -598,6 +599,18 @@ export class BlackJackManager extends Component {
 
     update(deltaTime: number) {
         
+    }
+
+    onCMDClearBet(){
+        this.clearBetingChips();
+        this.isRebetting = false;
+    }
+
+    clearBetingChips(){
+        // return betting chips to player, used when player click clear bet or when new game start, etc
+        for(var i =0; i<=5; i++){
+            this.bettingChipManager.returnChips(i,this.getPlayerSeat(1).BetOrginNode)
+        }
     }
 
     onRequestSeat(seatId: number) {
@@ -786,8 +799,9 @@ export class BlackJackManager extends Component {
     }
 
     setChipsOnPot(betPotIndex : number, bet_amount: number, playerBetting : BlackJackPlayerSeat, skipAnimation : boolean = true){
-        const prevSkip = this.skipChipsAnimation;
+        const previousSkipState =  this.skipChipsAnimation;
         this.skipChipsAnimation = skipAnimation;
+
 
         var targetWorldPosition = BlackJackPlayerBettingPots.instance.getPotWorldPosition(betPotIndex);
                             
@@ -796,7 +810,7 @@ export class BlackJackManager extends Component {
             this.bettingChipManager.addMoreBet(betPotIndex,chipNode);
         }
         this.bettingChipManager.forceChipsToCenter();
-        this.skipChipsAnimation = prevSkip;
+        this.skipChipsAnimation = previousSkipState;
     }
 
     /*

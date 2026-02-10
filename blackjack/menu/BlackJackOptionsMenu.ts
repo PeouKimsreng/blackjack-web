@@ -4,6 +4,7 @@ import { _decorator, Button, Component, director, isValid, Node, Sprite, SpriteF
 //import { fullScreen , isFullscreen , exitFullscreen } from '../../Utils';
 import { BlackJackManager } from '../manager/BlackJackManager';
 import { BlackJackUIGameRules } from '../game_ui/BlackJackUIGameRules';
+import { BlackJackUIGameHistory } from '../game_ui/BlackJackUIGameHistory';
 
 const { ccclass, property } = _decorator;
 
@@ -236,7 +237,7 @@ export class BlackJackOptionsMenu extends Component {
         this._isBusyShowDialog = true;
         BlackJackManager.instance.playButtonClickSound();
         this.hide();
-      //  UIGameHistory.instance.show();
+        BlackJackUIGameHistory.instance.show();
     }
 
 

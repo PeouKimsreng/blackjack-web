@@ -1,6 +1,4 @@
 import { _decorator, Button, Component, director, EventTouch, ImageAsset, isValid, Node, PageView, Quat, ScrollView, sp, Sprite, SpriteFrame, Texture2D, tween, Tween, v3, Vec3 } from 'cc';
-import { BlackJackUIToogle } from './BlackJackUIToogle';
-
 import { BlackJackManager } from '../manager/BlackJackManager';
 import { HandHistoryListItem } from '../hand history/HandHistoryListItem';
 
@@ -10,7 +8,7 @@ enum GameHistorState {
     SHOW = 1,
 };
 
-@ccclass('UIGameHistory')
+@ccclass('BlackJackUIGameHistory')
 export class BlackJackUIGameHistory extends Component {
     private _isActive : boolean = false;
 
